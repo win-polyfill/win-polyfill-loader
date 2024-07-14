@@ -9,31 +9,6 @@ PMMP_GLOBAL_DATA MmpGlobalDataPtr;
 #pragma message("WARNING: You are using a preview version of MemoryModulePP.")
 #endif
 
-PRTL_RB_TREE FindLdrpModuleBaseAddressIndex() {
-    PRTL_RB_TREE LdrpModuleBaseAddressIndex = nullptr;
-    PLDR_DATA_TABLE_ENTRY_WIN10 nt10 = decltype(nt10)(MmpGlobalDataPtr->MmpBaseAddressIndex->NtdllLdrEntry);
-    PRTL_BALANCED_NODE node = nullptr;
-    if (!nt10 || !RtlIsWindowsVersionOrGreater(6, 2, 0))return nullptr;
-    node = &nt10->BaseAddressIndexNode;
-    while (node->ParentValue & (~7)) node = decltype(node)(node->ParentValue & (~7));
-
-    if (!node->Red) {
-        BYTE count = 0;
-        PRTL_RB_TREE tmp = nullptr;
-        SEARCH_CONTEXT SearchContext{};
-        SearchContext.SearchPattern = (LPBYTE)&node;
-        SearchContext.PatternSize = sizeof(size_t);
-        while (NT_SUCCESS(RtlFindMemoryBlockFromModuleSection((HMODULE)nt10->DllBase, ".data", &SearchContext))) {
-            if (count++)return nullptr;
-            tmp = (decltype(tmp))SearchContext.Result;
-        }
-        if (count && tmp && tmp->Root && tmp->Min) {
-            LdrpModuleBaseAddressIndex = tmp;
-        }
-    }
-
-    return LdrpModuleBaseAddressIndex;
-}
 
 static __forceinline bool IsModuleUnloaded(PLDR_DATA_TABLE_ENTRY entry) {
 	if (RtlIsWindowsVersionOrGreater(6, 2, 0)) {

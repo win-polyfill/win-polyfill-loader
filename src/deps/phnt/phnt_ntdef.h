@@ -95,6 +95,37 @@ typedef GUID *PGUID;
 typedef const GUID* PCGUID;
 #endif
 
+#undef RtlMoveMemory
+#undef RtlZeroMemory
+#undef RtlFillMemory
+
+EXTERN_C
+NTSYSAPI
+VOID
+NTAPI
+RtlMoveMemory(
+    _Out_ VOID UNALIGNED *Destination,
+    _In_ const VOID UNALIGNED *Source,
+    _In_ SIZE_T Length);
+
+EXTERN_C
+NTSYSAPI
+VOID
+NTAPI
+RtlZeroMemory(
+   void* Destination,
+   size_t Length);
+
+EXTERN_C
+NTSYSAPI
+VOID
+NTAPI
+RtlFillMemory(
+   void* Destination,
+   size_t Length,
+   int Fill
+);
+
 #ifndef _NTDEF_
 #define _NTDEF_
 

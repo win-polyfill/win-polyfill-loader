@@ -2,17 +2,13 @@
 # SPDX-License-Identifier: MIT
 
 add_library(win-polyfill-loader SHARED
-  BaseAddressIndex.cpp
-  ImportTable.cpp
-  Initialize.cpp
-  InvertedFunctionTable.cpp
   LdrEntry.cpp
-  LoadDllMemoryApi.cpp
-  Loader.cpp
-  MemoryModule.cpp
-  Utils.cpp
+  BaseAddressIndex.cpp
+  ../deps/win32-crt/win32_crt_seh.cpp
+  Main.cpp
 )
 target_link_libraries(win-polyfill-loader PRIVATE
   win-polyfill-phnt
   ntdll
 )
+target_compile_options(win-polyfill-loader PRIVATE /Zl /GR- /GS-)

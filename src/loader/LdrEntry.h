@@ -1,9 +1,13 @@
 #pragma once
 
+#include "phnt.h"
+
 #define FLAG_REFERENCE		0
 #define FLAG_DEREFERENCE	1
 
 PLDR_DATA_TABLE_ENTRY NTAPI RtlAllocateDataTableEntry(_In_ PVOID BaseAddress);
+
+void LdrEntryLibInit();
 
 BOOL NTAPI RtlInitializeLdrDataTableEntry(
 	_Out_ PLDR_DATA_TABLE_ENTRY LdrEntry,
@@ -14,16 +18,6 @@ BOOL NTAPI RtlInitializeLdrDataTableEntry(
 );
 
 BOOL NTAPI RtlFreeLdrDataTableEntry(_In_ PLDR_DATA_TABLE_ENTRY LdrEntry);
-
-NTSTATUS NTAPI RtlUpdateReferenceCount(
-	_Inout_ PMEMORYMODULE pModule,
-	_In_ DWORD Flags
-);
-
-NTSTATUS NTAPI RtlGetReferenceCount(
-	_In_ PMEMORYMODULE pModule,
-	_Out_ PULONG Count
-);
 
 VOID NTAPI RtlInsertMemoryTableEntry(_In_ PLDR_DATA_TABLE_ENTRY LdrEntry);
 
@@ -282,4 +276,9 @@ typedef struct _LDR_DATA_TABLE_ENTRY_WIN11 :LDR_DATA_TABLE_ENTRY_WIN10_2 {
 	LDR_HOT_PATCH_STATE HotPatchState;                                      //0x130
 }LDR_DATA_TABLE_ENTRY_WIN11, * PLDR_DATA_TABLE_ENTRY_WIN11;
 
-ULONG NTAPI LdrHashEntry(_In_ UNICODE_STRING& DllBaseName, _In_ BOOL ToIndex = TRUE);
+ULONG NTAPI LdrHashEntryRaw(_In_ UNICODE_STRING& DllBaseName);
+
+FORCEINLINE ULONG NTAPI LdrHashEntry(_In_ UNICODE_STRING& DllBaseName)
+{
+	return LdrHashEntryRaw(DllBaseName) & (LDR_HASH_TABLE_ENTRIES - 1);
+}

@@ -1,13 +1,6 @@
 #pragma once
+#include "phnt.h"
 
-//BaseAddressIndex.cpp
-typedef struct _MMP_BASE_ADDRESS_INDEX_DATA {
-	PRTL_RB_TREE LdrpModuleBaseAddressIndex;
-	PLDR_DATA_TABLE_ENTRY NtdllLdrEntry;
-
-	PVOID _RtlRbInsertNodeEx;
-	PVOID _RtlRbRemoveNode;
-}MMP_BASE_ADDRESS_INDEX_DATA, * PMMP_BASE_ADDRESS_INDEX_DATA;
 
 //InvertedFunctionTable.cpp
 typedef struct _MMP_INVERTED_FUNCTION_TABLE_DATA {
@@ -37,6 +30,13 @@ typedef struct _MMP_TLS_DATA {
 	}Hooks;
 }MMP_TLS_DATA, * PMMP_TLS_DATA;
 
+typedef HRESULT(WINAPI* GetFileVersion_T)(
+    LPCWSTR szFilename,
+    LPWSTR szBuffer,
+    DWORD cchBuffer,
+    DWORD* dwLength
+    );
+
 //MmpDotNet.cpp
 typedef struct _MMP_DOT_NET_DATA {
 	FILETIME AssemblyTimes;
@@ -62,24 +62,6 @@ typedef struct _MMP_DOT_NET_DATA {
 		GetFileVersion_T OriginGetFileVersion2;
 	}Hooks;
 }MMP_DOT_NET_DATA, * PMMP_DOT_NET_DATA;
-
-typedef struct _MMP_FUNCTIONS {
-	decltype(&LdrLoadDllMemoryExW) _LdrLoadDllMemoryExW;
-	decltype(&LdrUnloadDllMemory) _LdrUnloadDllMemory;
-	decltype(&LdrUnloadDllMemoryAndExitThread) _LdrUnloadDllMemoryAndExitThread;
-
-	decltype(&MmpHandleTlsData) _MmpHandleTlsData;
-	decltype(&MmpReleaseTlsEntry) _MmpReleaseTlsEntry;
-}MMP_FUNCTIONS, * PMMP_FUNCTIONS;
-
-//ImportTable.cpp
-typedef struct _MMP_IAT_DATA {
-
-	LIST_ENTRY MmpIatResolverList;
-	CRITICAL_SECTION MmpIatResolverListLock;
-	MM_IAT_RESOLVER MmpIatResolverHead;
-
-}MMP_IAT_DATA, * PMMP_IAT_DATA;
 
 typedef enum class _WINDOWS_VERSION :BYTE {
 	null,
@@ -121,8 +103,6 @@ typedef struct _MMP_GLOBAL_DATA {
 
 	SYSTEM_INFO SystemInfo;
 
-	PMMP_BASE_ADDRESS_INDEX_DATA MmpBaseAddressIndex;
-
 	PMMP_INVERTED_FUNCTION_TABLE_DATA MmpInvertedFunctionTable;
 
 	PMMP_LDR_ENTRY_DATA MmpLdrEntry;
@@ -132,10 +112,6 @@ typedef struct _MMP_GLOBAL_DATA {
 	PMMP_DOT_NET_DATA MmpDotNet;
 
 	PVOID BaseAddress;
-
-	PMMP_FUNCTIONS MmpFunctions;
-
-	PMMP_IAT_DATA MmpIat;
 
 }MMP_GLOBAL_DATA, * PMMP_GLOBAL_DATA;
 
