@@ -4,10 +4,6 @@
 #include "MmpTlsp.h"
 #include "MmpTlsFiber.h"
 
-#include <cassert>
-#include <algorithm>
-#include <3rdparty/Detours/detours.h>
-
 
 PVOID NTAPI MmpQuerySystemInformation(
     _In_ SYSTEM_INFORMATION_CLASS SystemInformationClass,
@@ -89,7 +85,7 @@ DWORD NTAPI MmpGetThreadCount() {
                         if (NT_SUCCESS(status) && !!tbi.TebBaseAddress->ThreadLocalStoragePointer) {
                             ++result;
                         }
-                        
+
                         NtClose(hThread);
                     }
                 }
@@ -529,7 +525,7 @@ NTSTATUS NTAPI HookNtSetInformationProcess(
                         if (ProcessHandle) {
                             j->TlspLdrBlock[ProcessTlsInformation->TlsIndex] = ProcessTlsInformation->ThreadData[i].TlsModulePointer;
                         }
-                        
+
                         ProcessTlsInformation->ThreadData[i].TlsModulePointer = Tls->ThreadData[i].TlsModulePointer;
                     }
                 }
@@ -624,7 +620,7 @@ NTSTATUS NTAPI MmpAllocateTlsEntry(
 }
 
 NTSTATUS NTAPI MmpReleaseTlsEntry(_In_ PLDR_DATA_TABLE_ENTRY lpModuleEntry) {
-    
+
     RtlAcquireSRWLockExclusive(&MmpGlobalDataPtr->MmpTls->MmpTlsListLock);
 
     for (auto entry = MmpGlobalDataPtr->MmpTls->MmpTlsList.Flink; entry != &MmpGlobalDataPtr->MmpTls->MmpTlsList; entry = entry->Flink) {

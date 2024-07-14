@@ -406,7 +406,7 @@ NTSTATUS MmpAllocateGlobalData() {
 					0,
 					PAGE_READONLY
 				);
-				
+
 				NtClose(hSection);
 
 				if (NT_SUCCESS(status)) {

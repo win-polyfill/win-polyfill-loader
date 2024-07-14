@@ -1,5 +1,4 @@
 #include "stdafx.h"
-#include <3rdparty/Detours/detours.h>
 
 typedef struct _MMP_FAKE_HANDLE_LIST_ENTRY {
     LIST_ENTRY InMmpFakeHandleList;
@@ -227,7 +226,7 @@ HANDLE WINAPI HookCreateFileMappingW(
     auto iter = MmpFindHandleEntry(hFile);
     if (iter) {
         HANDLE hEvent = CreateEventW(nullptr, TRUE, FALSE, nullptr);
-        
+
         MmpInsertHandleEntry(hEvent, iter->value, !!(flProtect & SEC_IMAGE));
         return hEvent;
     }
@@ -344,7 +343,7 @@ HRESULT WINAPI HookGetFileVersion(
             PCOR20_METADATA meta = PCOR20_METADATA(LPBYTE(entry->DllBase) + cor2->MetaData.VirtualAddress);
             if (dwLength)*dwLength = meta->VersionLength;
             if (cchBuffer < meta->VersionLength)return 0x8007007A;
-            
+
             MultiByteToWideChar(CP_ACP, 0, meta->VersionString, meta->VersionLength, szBuffer, cchBuffer);
             return 0;
         }

@@ -1,12 +1,6 @@
 #pragma once
 
-#ifndef WIN32_NO_STATUS
-#define WIN32_NO_STATUS
-#include "../3rdparty/phnt/include/phnt_windows.h"
-#include "../3rdparty/phnt/include/phnt.h"
-#undef WIN32_NO_STATUS
-#include <ntstatus.h>
-#endif
+#include "phnt.h"
 
 //
 // Determine whether to use MmpTls(1) or LdrpTls(0)
