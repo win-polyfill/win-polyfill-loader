@@ -5,8 +5,6 @@
 
 
 static PRTL_RB_TREE LdrpModuleBaseAddressIndex;
-static PVOID _RtlRbInsertNodeEx;
-static PVOID _RtlRbRemoveNode;
 static DWORD WindowsVersion;
 
 NTSTATUS NTAPI RtlFindMemoryBlockFromModuleSection(
@@ -155,23 +153,6 @@ void BaseAddressIndexInit(PLDR_DATA_TABLE_ENTRY pNtdllEntry)
 	// TODO: _RtlRbRemoveNode _RtlRbInsertNodeEx from pNtdllEntry
 }
 
-BOOLEAN NTAPI RtlRbInsertNodeEx(
-	_In_ PRTL_RB_TREE Tree,
-	_In_ PRTL_BALANCED_NODE Parent,
-	_In_ BOOLEAN Right,
-	_Out_ PRTL_BALANCED_NODE Node) {
-	RtlZeroMemory(Node, sizeof(*Node));
-
-	if (!_RtlRbInsertNodeEx) return FALSE;
-	return decltype(&RtlRbInsertNodeEx)(_RtlRbInsertNodeEx)(Tree, Parent, Right, Node);
-}
-
-BOOLEAN NTAPI RtlRbRemoveNode(
-	_In_ PRTL_RB_TREE Tree,
-	_In_ PRTL_BALANCED_NODE Node) {
-	if (!_RtlRbRemoveNode) return FALSE;
-	return decltype(&RtlRbRemoveNode)(_RtlRbRemoveNode)(Tree, Node);
-}
 NTSTATUS NTAPI RtlInsertModuleBaseAddressIndexNode(
 	_In_ PLDR_DATA_TABLE_ENTRY DataTableEntry,
 	_In_ PVOID BaseAddress) {

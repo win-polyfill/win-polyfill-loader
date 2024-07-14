@@ -17,9 +17,14 @@
     "C:/CI-Tools/msys64/mingw32/bin",
     "C:/CI-Tools/msys64/usr/bin"
   ],
+  "cmake.environment": {
+    "PATH": "C:/Program Files/LLVM/bin/;${env:PATH}"
+  },
   "cmake.configureArgs": [
-    "-DCMAKE_EXE_LINKER_FLAGS_INIT=-SUBSYSTEM:CONSOLE,5.01",
-    "-DBUILD_TESTING=ON"
+    "-DBUILD_TESTING=ON",
+    "-DCMAKE_C_STANDARD_LIBRARIES=",
+    "-DCMAKE_CXX_STANDARD_LIBRARIES=",
+    "-DCMAKE_LINKER_TYPE=LLD",
   ],
   "C_Cpp.default.configurationProvider": "ms-vscode.cmake-tools",
 }

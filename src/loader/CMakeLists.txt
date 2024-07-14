@@ -4,6 +4,7 @@
 add_library(win-polyfill-loader SHARED
   LdrEntry.cpp
   BaseAddressIndex.cpp
+  ImportTable.cpp
   ../deps/win32-crt/win32_crt_seh.cpp
   Main.cpp
 )
