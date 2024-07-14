@@ -79,7 +79,7 @@ NTSTATUS NTAPI LdrLoadDllMemoryExW(
 		PLIST_ENTRY ListHead = &NtCurrentPeb()->Ldr->InLoadOrderModuleList, ListEntry = ListHead->Flink;
 		PIMAGE_NT_HEADERS h1 = RtlImageNtHeader(BufferAddress), h2 = nullptr;
 		if (!h1)return STATUS_INVALID_IMAGE_FORMAT;
-		
+
 		while (ListEntry != ListHead) {
 			PLDR_DATA_TABLE_ENTRY CurEntry = CONTAINING_RECORD(ListEntry, LDR_DATA_TABLE_ENTRY, InLoadOrderLinks);
 			ListEntry = ListEntry->Flink;
@@ -95,7 +95,7 @@ NTSTATUS NTAPI LdrLoadDllMemoryExW(
 			else {
 				continue;
 			}
-			
+
 			/* Check if name matches */
 			if (equal) {
 
@@ -104,10 +104,10 @@ NTSTATUS NTAPI LdrLoadDllMemoryExW(
 				if (!(module = MapMemoryModuleHandle((HMEMORYMODULE)CurEntry->DllBase)))continue;
 				if ((h1->OptionalHeader.SizeOfCode == h2->OptionalHeader.SizeOfCode) &&
 					(h1->OptionalHeader.SizeOfHeaders == h2->OptionalHeader.SizeOfHeaders)) {
-				
+
 					/* This is our entry!, update load count and return success */
 					if (!module->UseReferenceCount || dwFlags & LOAD_FLAGS_NOT_USE_REFERENCE_COUNT)return STATUS_INVALID_PARAMETER_3;
-					
+
 					RtlUpdateReferenceCount(module, FLAG_REFERENCE);
 					*BaseAddress = (HMEMORYMODULE)CurEntry->DllBase;
 					if (LdrEntry)*LdrEntry = CurEntry;
@@ -188,18 +188,22 @@ NTSTATUS NTAPI LdrLoadDllMemoryExW(
 			}
 		}
 
+#if 0
 		if (dwFlags & LOAD_FLAGS_HOOK_DOT_NET) {
 			MmpPreInitializeHooksForDotNet();
 		}
+#endif
 
 		if (!LdrpExecuteTLS(module) || !LdrpCallInitializers(module, DLL_PROCESS_ATTACH)) {
 			status = STATUS_DLL_INIT_FAILED;
 			break;
 		}
 
+#if 0
 		if (dwFlags & LOAD_FLAGS_HOOK_DOT_NET) {
 			MmpInitializeHooksForDotNet();
 		}
+#endif
 
 	} while (false);
 

@@ -27,17 +27,22 @@ typedef struct _LDR_SERVICE_TAG_RECORD
 } LDR_SERVICE_TAG_RECORD, *PLDR_SERVICE_TAG_RECORD;
 
 // symbols
-typedef struct _LDRP_CSLIST {
-    struct _LDRP_CSLIST_DEPENDENT {
-        PSINGLE_LIST_ENTRY NextDependentEntry;
-        struct _LDR_DDAG_NODE* DependentDdagNode;
-    }Dependent;
-    struct _LDRP_CSLIST_INCOMMING {
-        _SINGLE_LIST_ENTRY* NextIncommingEntry;
-        struct _LDR_DDAG_NODE* IncommingDdagNode;
-    }Incomming;
+typedef struct _LDRP_CSLIST
+{
     PSINGLE_LIST_ENTRY Tail;
-}LDRP_CSLIST;
+} LDRP_CSLIST, *PLDRP_CSLIST;
+
+typedef struct _LDRP_CSLIST_DEPENDENT
+{
+    PSINGLE_LIST_ENTRY NextDependentEntry;
+    struct _LDR_DDAG_NODE* DependentDdagNode;
+} LDRP_CSLIST_DEPENDENT, *PLDRP_CSLIST_DEPENDENT;
+
+typedef struct _LDRP_CSLIST_INCOMMING
+{
+    PSINGLE_LIST_ENTRY NextIncommingEntry;
+    struct _LDR_DDAG_NODE* IncommingDdagNode;
+} LDRP_CSLIST_INCOMMING, *PLDRP_CSLIST_INCOMMING;
 
 // symbols
 typedef enum _LDR_DDAG_STATE
@@ -87,12 +92,12 @@ typedef struct _LDR_DDAG_NODE
     union
     {
         // 6.2 and higher
-        _LDRP_CSLIST::_LDRP_CSLIST_DEPENDENT* Dependencies;
+        PLDRP_CSLIST_DEPENDENT Dependencies;
         // 6.2 to 6.3
         SINGLE_LIST_ENTRY RemovalLink;
     };
     // 0x1C 0x30 (6.2 and higher)
-    _LDRP_CSLIST::_LDRP_CSLIST_INCOMMING* IncomingDependencies;
+    PLDRP_CSLIST_INCOMMING IncomingDependencies;
     // 0x20 0x38 (6.2 and higher)
     LDR_DDAG_STATE State;
     // 0x24 0x40 (6.2 and higher)

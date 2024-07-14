@@ -68,8 +68,8 @@ struct _LDR_DDAG_NODE_WIN8 {
 	ULONG LoadCount;                                                        //0x18
 	ULONG ReferenceCount;                                                   //0x1c
 	ULONG DependencyCount;                                                  //0x20
-	_LDRP_CSLIST::_LDRP_CSLIST_DEPENDENT* Dependencies;						//0x28
-	_LDRP_CSLIST::_LDRP_CSLIST_INCOMMING* IncomingDependencies;				//0x30
+	PLDRP_CSLIST_DEPENDENT Dependencies;						//0x28
+	PLDRP_CSLIST_INCOMMING IncomingDependencies;				//0x30
 	_LDR_DDAG_STATE State;                                                  //0x38
 	_SINGLE_LIST_ENTRY CondenseLink;									    //0x40
 	ULONG PreorderNumber;                                                   //0x48

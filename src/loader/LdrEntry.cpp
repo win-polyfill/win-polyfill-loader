@@ -4,19 +4,19 @@
 static NTSTATUS RtlFreeDependencies(_In_ PLDR_DATA_TABLE_ENTRY_WIN10 LdrEntry) {
 	_LDR_DDAG_NODE* DependentDdgeNode = nullptr;
 	PLDR_DATA_TABLE_ENTRY_WIN10 ModuleEntry = nullptr;
-	_LDRP_CSLIST* head = (decltype(head))LdrEntry->DdagNode->Dependencies, * entry = head;
+	PLDRP_CSLIST_DEPENDENT head = LdrEntry->DdagNode->Dependencies, entry = head;
 	HANDLE heap = NtCurrentPeb()->ProcessHeap;
 	BOOL IsWin8 = RtlIsWindowsVersionInScope(6, 2, 0, 6, 3, -1);
 	if (!LdrEntry->DdagNode->Dependencies)return STATUS_SUCCESS;
 
 	//find all dependencies and free
 	do {
-		DependentDdgeNode = entry->Dependent.DependentDdagNode;
+		DependentDdgeNode = entry->DependentDdagNode;
 		if (DependentDdgeNode->Modules.Flink->Flink != &DependentDdgeNode->Modules) __fastfail(FAST_FAIL_CORRUPT_LIST_ENTRY);
 		ModuleEntry = decltype(ModuleEntry)((size_t)DependentDdgeNode->Modules.Flink - offsetof(_LDR_DATA_TABLE_ENTRY_WIN8, NodeModuleLink));
 		if (ModuleEntry->DdagNode != DependentDdgeNode) __fastfail(FAST_FAIL_CORRUPT_LIST_ENTRY);
 		if (!DependentDdgeNode->IncomingDependencies) __fastfail(FAST_FAIL_CORRUPT_LIST_ENTRY);
-		_LDRP_CSLIST::_LDRP_CSLIST_INCOMMING* _last = DependentDdgeNode->IncomingDependencies, * _entry = _last;
+		PLDRP_CSLIST_INCOMMING _last = DependentDdgeNode->IncomingDependencies, _entry = _last;
 		_LDR_DDAG_NODE* CurrentDdagNode;
 		ULONG State = 0;
 		PVOID Cookies;
@@ -40,7 +40,7 @@ static NTSTATUS RtlFreeDependencies(_In_ PLDR_DATA_TABLE_ENTRY_WIN10 LdrEntry) {
 						PSINGLE_LIST_ENTRY i = _entry->NextIncommingEntry;
 						while (i->Next != (PSINGLE_LIST_ENTRY)_entry)i = i->Next;
 						i->Next = _entry->NextIncommingEntry;
-						DependentDdgeNode->IncomingDependencies = (_LDRP_CSLIST::_LDRP_CSLIST_INCOMMING*)_entry->NextIncommingEntry;
+						DependentDdgeNode->IncomingDependencies = (PLDRP_CSLIST_INCOMMING)_entry->NextIncommingEntry;
 					}
 				}
 				//node is not head
@@ -56,7 +56,7 @@ static NTSTATUS RtlFreeDependencies(_In_ PLDR_DATA_TABLE_ENTRY_WIN10 LdrEntry) {
 		} while (_entry != _last);
 		//free LoaderLock
 		LdrUnlockLoaderLock(0, Cookies);
-		entry = (decltype(entry))entry->Dependent.NextDependentEntry;
+		entry = (decltype(entry))entry->NextDependentEntry;
 
 		//free it
 		if (IsWin8) {
@@ -75,7 +75,7 @@ static NTSTATUS RtlFreeDependencies(_In_ PLDR_DATA_TABLE_ENTRY_WIN10 LdrEntry) {
 		RtlFreeHeap(heap, 0, LdrEntry->DdagNode->Dependencies);
 
 		//lookup next dependent.
-		LdrEntry->DdagNode->Dependencies = (_LDRP_CSLIST::_LDRP_CSLIST_DEPENDENT*)(entry == head ? nullptr : entry);
+		LdrEntry->DdagNode->Dependencies = (PLDRP_CSLIST_DEPENDENT)(entry == head ? nullptr : entry);
 	} while (entry != head);
 
 	return STATUS_SUCCESS;
@@ -124,7 +124,7 @@ BOOL NTAPI RtlInitializeLdrDataTableEntry(
 		auto entry = (PLDR_DATA_TABLE_ENTRY_WIN11)LdrEntry;
 		entry->CheckSum = headers->OptionalHeader.CheckSum;
 	}
-		
+
 	case WINDOWS_VERSION::win10:
 	case WINDOWS_VERSION::win10_1:
 	case WINDOWS_VERSION::win10_2: {

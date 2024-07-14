@@ -1,7 +1,7 @@
 ﻿# Copyright 2024 Yonggang Luo
 # SPDX-License-Identifier: MIT
 
-add_library(win-polyfill-loader STATIC
+add_library(win-polyfill-loader SHARED
   BaseAddressIndex.cpp
   ImportTable.cpp
   Initialize.cpp
@@ -12,4 +12,7 @@ add_library(win-polyfill-loader STATIC
   MemoryModule.cpp
   Utils.cpp
 )
-target_link_libraries(win-polyfill-loader PRIVATE win-polyfill-phnt)
+target_link_libraries(win-polyfill-loader PRIVATE
+  win-polyfill-phnt
+  ntdll
+)

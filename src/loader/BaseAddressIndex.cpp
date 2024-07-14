@@ -1,4 +1,3 @@
-#define _NTHALLIB_
 #include "stdafx.h"
 
 BOOLEAN NTAPI RtlRbInsertNodeEx(
