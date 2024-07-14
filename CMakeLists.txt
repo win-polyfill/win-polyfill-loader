@@ -17,6 +17,7 @@ if ("${CMAKE_MSVC_RUNTIME_LIBRARY}" STREQUAL "")
 endif()
 
 add_subdirectory(src/deps/phnt)
+add_subdirectory(src/loader)
 
 if(BUILD_TESTING)
   include(CTest)

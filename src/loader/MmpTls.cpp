@@ -4,6 +4,9 @@
 #include "MmpTlsp.h"
 #include "MmpTlsFiber.h"
 
+#include <assert.h>
+#include <algorithm>
+
 
 PVOID NTAPI MmpQuerySystemInformation(
     _In_ SYSTEM_INFORMATION_CLASS SystemInformationClass,

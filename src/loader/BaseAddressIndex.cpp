@@ -1,20 +1,21 @@
+#define _NTHALLIB_
 #include "stdafx.h"
 
-VOID NTAPI RtlRbInsertNodeEx(
+BOOLEAN NTAPI RtlRbInsertNodeEx(
 	_In_ PRTL_RB_TREE Tree,
 	_In_ PRTL_BALANCED_NODE Parent,
 	_In_ BOOLEAN Right,
 	_Out_ PRTL_BALANCED_NODE Node) {
 	RtlZeroMemory(Node, sizeof(*Node));
 
-	if (!MmpGlobalDataPtr->MmpBaseAddressIndex->_RtlRbInsertNodeEx)return;
+	if (!MmpGlobalDataPtr->MmpBaseAddressIndex->_RtlRbInsertNodeEx) return FALSE;
 	return decltype(&RtlRbInsertNodeEx)(MmpGlobalDataPtr->MmpBaseAddressIndex->_RtlRbInsertNodeEx)(Tree, Parent, Right, Node);
 }
 
-VOID NTAPI RtlRbRemoveNode(
+BOOLEAN NTAPI RtlRbRemoveNode(
 	_In_ PRTL_RB_TREE Tree,
 	_In_ PRTL_BALANCED_NODE Node) {
-	if (!MmpGlobalDataPtr->MmpBaseAddressIndex->_RtlRbRemoveNode)return;
+	if (!MmpGlobalDataPtr->MmpBaseAddressIndex->_RtlRbRemoveNode) return FALSE;
 	return decltype(&RtlRbRemoveNode)(MmpGlobalDataPtr->MmpBaseAddressIndex->_RtlRbRemoveNode)(Tree, Node);
 }
 

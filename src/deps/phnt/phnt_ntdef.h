@@ -53,11 +53,6 @@
 #if (PHNT_MODE != PHNT_MODE_KERNEL)
 #include "win-polyfill-arch.h"
 
-
-#ifndef NOMINMAX
-#define NOMINMAX
-#endif
-
 #ifndef INT_ERROR
 #define INT_ERROR (-1)
 #endif

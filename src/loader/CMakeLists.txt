@@ -10,10 +10,6 @@ add_library(win-polyfill-loader STATIC
   LoadDllMemoryApi.cpp
   Loader.cpp
   MemoryModule.cpp
-  MmpDotNet.cpp
-  MmpLdrpTls.cpp
-  MmpTls.cpp
-  MmpTlsFiber.cpp
   Utils.cpp
 )
 target_link_libraries(win-polyfill-loader PRIVATE win-polyfill-phnt)
