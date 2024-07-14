@@ -1,0 +1,60 @@
+﻿name: windows-msvc
+
+on: [push]
+
+jobs:
+  Build:
+    strategy:
+      matrix:
+        arch: [x86, amd64]
+    runs-on: windows-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build And Test
+        working-directory: ./
+        run: |
+          $ProgramFiles = ${env:ProgramFiles(x86)}
+
+          if (-not $ProgramFiles)
+          {
+              $ProgramFiles = $env:ProgramFiles
+          }
+
+          $BuiltInVsWhereExe = "$ProgramFiles\Microsoft Visual Studio\Installer\vswhere.exe"
+
+          if (-not (Test-Path $BuiltInVsWhereExe))
+          {
+              throw "Can not found vswhere.exe!"
+          }
+
+          Write-Output $BuiltInVsWhereExe
+          [String]$vsPath = &"${BuiltInVsWhereExe}" -latest -products * -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -property installationpath
+          if (!$vsPath) {
+              throw "Unable to find the installation path for Visual Studio.";
+          }
+          Write-Host "Visual Studio vsPath:${vsPath}"
+
+          [String]$dllPath = (& "${BuiltInVsWhereExe}" -latest -prerelease -products * -requires Microsoft.Component.MSBuild -find Common7\Tools\Microsoft.VisualStudio.DevShell.dll)
+          if (!$dllPath) {
+              throw "No path to run the DLL environment import.";
+          }
+          Write-Host("DLL Path: ${dllPath}");
+          Import-Module $dllPath;
+
+          Enter-VsDevShell -VsInstallPath $vsPath -SkipAutomaticLocation -DevCmdArguments '-host_arch=x64 -arch=${{ matrix.arch }}'
+
+          $envvars = gci env:
+          $Max = ($envvars.name| Measure-Object -Property length -Maximum).Maximum + 3
+          $envvars | % {Write-Host $_.name.padright($Max,' ')  -ForegroundColor Cyan -NoNewline;Write-Host $_.value}
+
+          mkdir build
+          pushd build
+          cmake -DBUILD_TESTING:BOOL=TRUE $env:GITHUB_WORKSPACE -G "Ninja Multi-Config"
+
+          cmake --build . --config Debug
+          ctest -C Debug
+
+          cmake --build . --config RelWithDebInfo
+          ctest -C RelWithDebInfo

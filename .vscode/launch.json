@@ -1,0 +1,42 @@
+{
+  // Use IntelliSense to learn about possible attributes.
+  // Hover to view descriptions of existing attributes.
+  // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "(Windows)pebteb-test-i686",
+      "type": "cppvsdbg",
+      "request": "launch",
+      "program": "${workspaceFolder}/build/i686-pc-windows-msvc-17/bin/Debug/pebteb-test",
+      "args": [],
+      "stopAtEntry": false,
+      "cwd": "${workspaceFolder}/build/",
+      "environment": [],
+      "console": "integratedTerminal",
+      "sourceFileMap": {
+        "D:\\a\\_work\\1\\s\\src\\vctools\\crt\\vcruntime\\src\\internal": "C:\\work\\study\\runtimes\\msvcrt\\VC\\crt\\src\\vcruntime",
+        "D:\\a\\_work\\1\\s\\src\\vctools\\crt\\vcstartup\\src\\gs": "C:\\work\\study\\runtimes\\msvcrt\\VC\\crt\\src\\vcruntime",
+        "D:\\a\\_work\\1\\s\\src\\vctools\\crt\\vcstartup\\src\\startup": "C:\\work\\study\\runtimes\\msvcrt\\VC\\crt\\src\\vcruntime",
+        "minkernel\\crts\\ucrt\\src\\appcrt": "C:\\work\\study\\runtimes\\msvcrt\\Windows\\Source\\ucrt"
+      }
+    },
+    {
+      "name": "(Windows)pebteb-test-x64",
+      "type": "cppvsdbg",
+      "request": "launch",
+      "program": "${workspaceFolder}/build/x64-pc-windows-msvc-17/bin/Debug/pebteb-test",
+      "args": [],
+      "stopAtEntry": false,
+      "cwd": "${workspaceFolder}/build/",
+      "environment": [],
+      "console": "integratedTerminal",
+      "sourceFileMap": {
+        "D:\\a\\_work\\1\\s\\src\\vctools\\crt\\vcruntime\\src\\internal": "C:\\work\\study\\runtimes\\msvcrt\\VC\\crt\\src\\vcruntime",
+        "D:\\a\\_work\\1\\s\\src\\vctools\\crt\\vcstartup\\src\\gs": "C:\\work\\study\\runtimes\\msvcrt\\VC\\crt\\src\\vcruntime",
+        "D:\\a\\_work\\1\\s\\src\\vctools\\crt\\vcstartup\\src\\startup": "C:\\work\\study\\runtimes\\msvcrt\\VC\\crt\\src\\vcruntime",
+        "minkernel\\crts\\ucrt\\src\\appcrt": "C:\\work\\study\\runtimes\\msvcrt\\Windows\\Source\\ucrt"
+      }
+    },
+  ]
+}
