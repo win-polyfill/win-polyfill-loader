@@ -98,6 +98,8 @@ typedef const GUID* PCGUID;
 #undef RtlMoveMemory
 #undef RtlZeroMemory
 #undef RtlFillMemory
+#undef RtlCopyMemory
+#define RtlCopyMemory RtlMoveMemory
 
 EXTERN_C
 NTSYSAPI

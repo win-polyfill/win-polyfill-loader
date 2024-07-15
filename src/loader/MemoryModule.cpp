@@ -1,4 +1,4 @@
-#include "stdafx.h"
+#include "MemoryModule.h"
 
 #if defined(_M_ARM64)
 #define HOST_MACHINE IMAGE_FILE_MACHINE_ARM64
@@ -29,66 +29,6 @@ static const int ProtectionFlags[2][2][2] = {
 	},
 };
 
-int MmpSizeOfImageHeadersUnsafe(PVOID BaseAddress) {
-	PIMAGE_DOS_HEADER dh = (PIMAGE_DOS_HEADER)BaseAddress;
-	PIMAGE_NT_HEADERS nh = (PIMAGE_NT_HEADERS)((LPBYTE)BaseAddress + dh->e_lfanew);
-
-	//https://learn.microsoft.com/en-us/windows/win32/api/winnt/ns-winnt-image_optional_header32
-	int sizeOfHeaders = dh->e_lfanew +										// e_lfanew member of IMAGE_DOS_HEADER
-		4 +																	// 4 byte signature
-		sizeof(IMAGE_FILE_HEADER) +											// size of IMAGE_FILE_HEADER
-		sizeof(IMAGE_OPTIONAL_HEADER) +										// size of optional header
-		sizeof(IMAGE_SECTION_HEADER) * nh->FileHeader.NumberOfSections;		// size of all section headers
-	return sizeOfHeaders;
-}
-
-PMEMORYMODULE WINAPI MapMemoryModuleHandle(HMEMORYMODULE hModule) {
-
-	if (!hModule)return nullptr;
-
-	PIMAGE_NT_HEADERS nh = RtlImageNtHeader(hModule);
-	if (!nh)return nullptr;
-
-	int sizeOfHeaders = MmpSizeOfImageHeadersUnsafe(hModule);
-	PMEMORYMODULE pModule = (PMEMORYMODULE)((LPBYTE)hModule + sizeOfHeaders);
-	if (pModule->Signature != MEMORY_MODULE_SIGNATURE || pModule->codeBase != (LPBYTE)hModule)return nullptr;
-	return pModule;
-}
-
-BOOL WINAPI IsValidMemoryModuleHandle(HMEMORYMODULE hModule) {
-	return MapMemoryModuleHandle(hModule) != nullptr;
-}
-
-NTSTATUS MmpInitializeStructure(DWORD ImageFileSize, LPCVOID ImageFileBuffer, PIMAGE_NT_HEADERS ImageHeaders) {
-
-	if (!ImageHeaders)return STATUS_ACCESS_VIOLATION;
-
-	//
-	// Make sure there have enough free space to embed our structure.
-	//
-	int sizeOfHeaders = MmpSizeOfImageHeadersUnsafe((PVOID)ImageHeaders->OptionalHeader.ImageBase);
-	PIMAGE_SECTION_HEADER pSections = IMAGE_FIRST_SECTION(ImageHeaders);
-	for (int i = 0; i < ImageHeaders->FileHeader.NumberOfSections; ++i) {
-		if (pSections[i].VirtualAddress < sizeOfHeaders + sizeof(MEMORYMODULE)) {
-			return STATUS_NOT_SUPPORTED;
-		}
-	}
-
-	//
-	// Setup MemoryModule structure.
-	//
-	PMEMORYMODULE hMemoryModule = (PMEMORYMODULE)(ImageHeaders->OptionalHeader.ImageBase + sizeOfHeaders);
-	RtlZeroMemory(hMemoryModule, sizeof(MEMORYMODULE));
-	hMemoryModule->codeBase = (PBYTE)ImageHeaders->OptionalHeader.ImageBase;
-	hMemoryModule->dwImageFileSize = ImageFileSize;
-	hMemoryModule->Signature = MEMORY_MODULE_SIGNATURE;
-	hMemoryModule->SizeofHeaders = ImageHeaders->OptionalHeader.SizeOfHeaders;
-	hMemoryModule->lpReserved = (LPVOID)ImageFileBuffer;
-	hMemoryModule->dwReferenceCount = 1;
-
-	return STATUS_SUCCESS;
-}
-
 NTSTATUS MemorySetSectionProtection(
 	_In_ LPBYTE base,
 	_In_ PIMAGE_NT_HEADERS lpNtHeaders) {
@@ -114,7 +54,7 @@ NTSTATUS MemorySetSectionProtection(
 }
 
 NTSTATUS MemoryLoadLibrary(
-	_Out_ HMEMORYMODULE* MemoryModuleHandle,
+	_Out_ PVOID* MemoryModuleHandle,
 	_In_ LPCVOID data,
 	_In_ DWORD size) {
 
@@ -197,16 +137,6 @@ NTSTATUS MemoryLoadLibrary(
 	}
 
 	//
-	// Allocate memory for image headers
-	//
-	size_t alignedHeadersSize = (DWORD)AlignValueUp(old_header->OptionalHeader.SizeOfHeaders + sizeof(MEMORYMODULE), MmpGlobalDataPtr->SystemInfo.dwPageSize);
-	if (!VirtualAlloc(base, alignedHeadersSize, MEM_COMMIT, PAGE_READWRITE)) {
-		VirtualFree(base, 0, MEM_RELEASE);
-		status = STATUS_NO_MEMORY;
-		return status;
-	}
-
-	//
 	// Copy headers
 	//
 	PIMAGE_DOS_HEADER new_dos_header = (PIMAGE_DOS_HEADER)base;
@@ -219,12 +149,6 @@ NTSTATUS MemoryLoadLibrary(
 	new_header->OptionalHeader.ImageBase = (size_t)base;
 
 	do {
-		//
-		// Setup MEMORYMODULE structure.
-		//
-		status = MmpInitializeStructure(size, data, new_header);
-		if (!NT_SUCCESS(status)) break;
-
 		//
 		// Allocate and copy sections
 		//
@@ -307,29 +231,9 @@ NTSTATUS MemoryLoadLibrary(
 		}
 		if (!NT_SUCCESS(status))break;
 
-		__try {
-			*MemoryModuleHandle = (HMEMORYMODULE)base;
-		}
-		__except (EXCEPTION_EXECUTE_HANDLER) {
-			status = GetExceptionCode();
-			break;
-		}
-
+		*MemoryModuleHandle = base;
 		return status;
 	} while (false);
 
-	MemoryFreeLibrary((HMEMORYMODULE)base);
 	return status;
-}
-
-BOOL MemoryFreeLibrary(HMEMORYMODULE mod) {
-	PMEMORYMODULE module = MapMemoryModuleHandle(mod);
-	PIMAGE_NT_HEADERS headers = RtlImageNtHeader(mod);
-
-	if (!module) return FALSE;
-	if (module->loadFromLdrLoadDllMemory && !module->underUnload)return FALSE;
-	if (module->hModulesList)MemoryFreeImportTable(module);
-
-	if (module->codeBase) VirtualFree(mod, 0, MEM_RELEASE);
-	return TRUE;
 }
